@@ -1,0 +1,14 @@
+{
+	"manifest_version": 3,
+	"name": "Youtube bookmark thumbnail",
+	"description": "Youtube bookmark thumbnail",
+	"version": "0.1",
+
+	"permissions": ["tabs", "bookmarks"],
+	
+	"action": {
+		"default_title": "Youtube bookmark thumbnail",
+		"default_popup": "popup.html"
+	},
+	"incognito": "split"
+}

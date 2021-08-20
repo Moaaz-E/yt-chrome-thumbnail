@@ -1,0 +1,97 @@
+// *:hover {
+//     .thumbnail {
+//         transform: translate(-50%, -50%);
+//         left: 50%;
+//         top: 50%;
+//         position: fixed;
+//         opacity: 0;
+//         height: 80%;
+//         animation: move_eye 250ms linear forwards;
+//         animation-delay: 500ms;
+//     }
+// }
+// .thumbnail {
+//     height: 100%;
+//     position: absolute;
+//     left: 0;
+//     top: 0;
+//     z-index: 100;
+//     opacity: 1;
+// }
+
+svg.star {
+    cursor: pointer;
+    &.starred {
+        fill: #FEC558;
+    }
+    &:not(.starred) {
+        &:hover {
+            // stroke-dashoffset:68;
+            animation:trap_stroke 0.5s ease-in-out 0.2s forwards; //, var(--activeAni, null);
+        }
+    }
+    // &:active {
+        // --activeAni: trap_fill 0.5s ease-in-out forwards;
+        // animation: trap_fill 0.5s ease-in-out forwards;
+    // }
+}
+
+@keyframes null {
+    0%,100%{font:inherit}
+}
+
+@keyframes trap_stroke {
+    0% {
+        stroke-dashoffset: 68.5;
+        stroke-dasharray:68;
+
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+        stroke-dasharray:68;
+    }
+}
+
+@keyframes trap_fill {
+    0% {
+        fill: none;
+    }
+
+    100% {
+        fill: #FEC558;
+    }
+}
+
+*:hover {
+    .thumbnail {
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+        opacity: 0;
+        height: 80%;
+        animation: thumbnail_animation 300ms linear forwards;
+        animation-delay: 300ms;
+        z-index: 5;
+    }
+}
+.thumbnail {
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 1;
+}
+
+@keyframes thumbnail_animation {
+    from {
+        position: fixed;
+        opacity: 0; 
+        // height: 100%;
+    } 
+    to {
+        position: fixed;
+        opacity: 1;
+        // height: 50%;
+    }  
+}
