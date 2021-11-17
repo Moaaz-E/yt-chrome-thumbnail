@@ -95,3 +95,13 @@ svg.star {
         // height: 50%;
     }  
 }
+
+path {
+    transform-origin: center;
+    transition-duration: 2s;
+}
+
+path.expanded {
+    transform-origin: center;
+    transform: rotate(90deg);
+}

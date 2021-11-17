@@ -26,6 +26,20 @@ export function Append<T extends Element | IComponent>(element : T) {
     };
 }
 
+export function AppendAny<T extends Element | IComponent>(element : T) {
+    const _element = (<IComponent>element).render != null ? (<IComponent>element).render() : <Element>element;
+    return <T extends Element | IComponent>(...children : (Element|IComponent)[]) => {
+
+        for (const child of children) {
+            const _child = (<IComponent>child).render != null ? (<IComponent>child).render() : <Element>child;
+            if(_element && _child) {
+                _element.appendChild(_child);
+            }
+        }
+        return element;
+    };
+}
+
 interface IComponen<MutableState = {}> {
     mutable : MutableState;
     render() : Element;

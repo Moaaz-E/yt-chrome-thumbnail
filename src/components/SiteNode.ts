@@ -1,8 +1,9 @@
 import {IComponent, Append} from "./IComponent";
-import { GetSharedMutable, MountableElement } from "./State";
+import { GetSharedMutable, Getter, MountableElement } from "./State";
 import "../style/main.scss";
+import { Component } from "./Core";
 
-export default class SiteNode implements IComponent {
+export default class SiteNode extends Component {
     private url : string;
     private depth : number;
     private title: string;
@@ -10,9 +11,12 @@ export default class SiteNode implements IComponent {
     private init = false;
     private date: number;
     private img! : HTMLImageElement;
+    private filter :Getter<string>;
     element!: HTMLElement;
 
-    constructor(url : string, title : string, date : number | undefined, depth : number) {
+    constructor(url : string, title : string, date : number | undefined, depth : number, filter? : Getter<string>) {
+        super()
+        this.filter = filter ?? (() => "");
         window.addEventListener("scroll", (ev) => {
             this.Visibility(this.element);
         })
@@ -20,7 +24,7 @@ export default class SiteNode implements IComponent {
         this.title = title;
         this.depth = depth; 
         this.date = date ?? 0;
-        MountableElement(this);
+        // MountableElement(this);
     }
 
     rendered : (element : HTMLElement) => void = (el) => {
@@ -59,7 +63,7 @@ export default class SiteNode implements IComponent {
     }
     
     render(): Element | null {
-        const filter = GetSharedMutable("search");
+        const filter = this.filter()
         if(!this.title.toLowerCase().includes(filter) && filter != "") {
             return null;
         }

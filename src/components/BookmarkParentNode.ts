@@ -1,24 +1,27 @@
 import { Append, IComponent } from "./IComponent";
 // import "../style/main.scss";
 import "../style/_main.css"
-import svg from "./svg"
-import { GetMutable, ExpandedLocalStorage, Mutable, StarredLocalStorage, GetSharedMutable } from "./State";
+import svg, { SvgPath } from "./svg"
+import { ExpandedLocalStorage, StarredLocalStorage, GetSharedMutable, Getter } from "./State";
 import SiteNode from "./SiteNode";
-import { TreeNode } from "./Core";
+import { Component, Transition, TreeNode } from "./Core";
 
 
-export default class BookMarkParentNode implements IComponent {
-    private _children  = new Mutable<IComponent[]>([]);
+export default class BookMarkParentNode extends Component {
+    private _children  = this.NewState<IComponent[]>([]);
     private _treeNode : chrome.bookmarks.BookmarkTreeNode;
     private _title : string;
     private depth;
-    private expanded = new Mutable<boolean>(false);
+    private expanded = this.NewState<boolean>(false);
     private path : TreeNode<string>
+    private filter? : Getter<string>
     starred: boolean | undefined;
     // private expansionCallback: (node: chrome.bookmarks.BookmarkTreeNode, expanded : boolean) => void;
     // constructor(treeNode : chrome.bookmarks.BookmarkTreeNode, expansionCallback : (node : chrome.bookmarks.BookmarkTreeNode, expoanded : boolean) => void, depth? : number) {
 
-    constructor(treeNode : chrome.bookmarks.BookmarkTreeNode, depth? : number, parentNode? : TreeNode<string>, starred? : boolean) {
+    constructor(treeNode : chrome.bookmarks.BookmarkTreeNode, depth? : number, parentNode? : TreeNode<string>, starred? : boolean, filter? : Getter<string>) {
+        super();
+        this.filter = filter;
         const starredBookmarks = StarredLocalStorage.GetEntries();
         this.starred = starred;
         if(GetSharedMutable(treeNode.id)) {
@@ -47,14 +50,18 @@ export default class BookMarkParentNode implements IComponent {
         const group = document.createElement("li");
         group.classList.add("flex", "items-center", "mr-10");
 
-        const _svg = new svg({className: "h-8 w-8 rounded-full ring-2 m-2 shadow-md ring-opacity-50 cursor-pointer ring-gray-200", pathD: "M12 4v16m8-8H4"});
+        const path = new SvgPath("M12 4v16", 2)
+        Transition(path, (!this.expanded.$ ? "expanded" : ""), (this.expanded.$ ? "expanded" : ""))
+        const secondPath = new SvgPath("M20 12H4", 2)
+        const _svg = new svg({className: "h-8 w-8 rounded-full ring-2 m-2 shadow-md ring-opacity-50 cursor-pointer ring-gray-200"});
+        _svg.FromElement(path, secondPath)
         const svgElement = _svg.render();
         
         const title = document.createElement("span");
         title.classList.add("text-xl", "font-medium", "text-black")
         title.innerText = this._title;
 
-        const star = new svg({className: "star h-8 w-8 ml-auto", pathD: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"});
+        const star = new svg({className: "star h-8 w-8 ml-auto", pathD: ["M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"]});
         const starEle = <HTMLElement>star.render();
         if(this.starred) {
             starEle.classList.toggle("starred");
@@ -109,10 +116,10 @@ export default class BookMarkParentNode implements IComponent {
             let youtubePages : IComponent[] = []
             this._treeNode.children?.forEach((treeNode) => {
                 if(treeNode.children) {
-                    children.push(new BookMarkParentNode(treeNode, this.depth+1, this.path));
+                    children.push(new BookMarkParentNode(treeNode, this.depth+1, this.path, undefined, this.filter));
                 }
                 else if (treeNode.url && treeNode.url?.match(/youtube\.com/)) {
-                    const line = new SiteNode(treeNode.url, treeNode.title, treeNode.dateAdded, this.depth+1);
+                    const line = new SiteNode(treeNode.url, treeNode.title, treeNode.dateAdded, this.depth+1, this.filter);
                     youtubePages.push(line);
                 }
             })

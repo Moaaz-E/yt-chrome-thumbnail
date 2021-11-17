@@ -1,6 +1,7 @@
 import { IComponent } from "./IComponent";
 
 type internalState = {[id : number] : any}
+type scopedInternalState = {[id : number] : {val: any, comp : IComponent}}
 type SetMutable<T> = (mutable: T) => void;
 
 class StateStore {
@@ -34,6 +35,70 @@ class StateStore {
     }
 }
 
+
+class ScopeStateStore {
+    private readonly updateCallback : ((options: {cancel : boolean}) => void)[] = [];
+    private stateCallback : { [key:string]:() => void; } = {};
+    private internalState : scopedInternalState = {};
+    private counter = 0;
+    private cancellationToken = {cancel: false};
+
+    
+    push(component : IComponent,  item: any) {
+        this.internalState[this.counter] = {val: item, comp: component};
+        return this.counter++;
+    }
+
+    update(id : number, item : any) {
+        this.internalState[id].val = item;
+        this.internalState[id].comp.render();
+        this.cancellationToken.cancel = true;
+        // this.updateCallback.forEach((cb) => {
+        //     this.cancellationToken = {cancel: false};
+        //     cb(this.cancellationToken);   
+        // })
+    }
+
+    // TODO remove
+    get(id : number) {
+        return this.internalState[id];
+    }
+
+    addListener(cb : ((options : {cancel : boolean}) => void)) {
+        this.updateCallback.push(cb);
+    }
+}
+
+export type Getter<T> = () => T;
+
+const scopedState = new ScopeStateStore();
+export class ScopedMutable<T> {
+    private _value : T;
+    private readonly _id : number;
+    constructor(component : IComponent, initial? : T);
+    constructor(component : IComponent, initial : T)
+    constructor(component : IComponent, initial : T) {
+        this._id = scopedState.push(component, initial);
+        this._value = initial;
+    }
+
+    public set $(v : T) {
+        this._value = v;
+        scopedState.update(this._id, this._value);
+    }
+
+    public get $() : T {
+        return this._value;
+    }
+
+    ReactiveGet() : Getter<T> {
+        return (() => {
+            return this.$;
+        }).bind(this);
+    }
+}
+
+
 export const state = new StateStore();
 
 
@@ -56,8 +121,6 @@ export class Mutable<T> {
         return this._value;
     }
 }
-
-
 
 class Observer {
     private callbacks : MutationCallback[] = [];
