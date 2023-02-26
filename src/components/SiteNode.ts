@@ -20,8 +20,8 @@ export default class SiteNode extends Component {
         window.addEventListener("scroll", (ev) => {
             this.Visibility(this.element);
         })
-        this.url = url;
-        this.title = title;
+        this.url = "";
+        this.title = "sample title";
         this.depth = depth; 
         this.date = date ?? 0;
         // MountableElement(this);

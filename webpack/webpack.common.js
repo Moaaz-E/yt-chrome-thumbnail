@@ -3,6 +3,8 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const postCSS = require("postcss-loader");
 const srcDir = path.join(__dirname, "..", "src");
+const sveltePreprocess = require("svelte-preprocess");
+
 
 module.exports = {
     mode: "development",
@@ -23,15 +25,22 @@ module.exports = {
     optimization: {
         splitChunks: {
             name: "vendor",
-            chunks: "initial",
+            chunks: "async",
         },
     },
     module: {
         rules: [
             {
                 test: /\.svelte$/,
-                use: "svelte-loader",
-                include: /src/
+                use: 
+                [{
+                    loader: "svelte-loader",
+                    options: {
+                        preprocess: sveltePreprocess({})
+                    }
+                }],
+                include: /src/,
+                
             },
             {
                 test: /\.tsx?$/,

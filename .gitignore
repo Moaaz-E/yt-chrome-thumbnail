@@ -1,6 +1,5 @@
 dist
 node_modules
 build.*
-*.svelte
 src/*.js
 dockerfile
